@@ -215,16 +215,20 @@ function ItemDAO(database) {
          *
          */
 
-        var reviewDoc = {
+        let reviewDoc = {
             name: name,
             comment: comment,
             stars: stars,
             date: Date.now()
-        }
-
-        var dummyItem = this.createDummyItem();
-        dummyItem.reviews = [reviewDoc];
-        callback(dummyItem);
+        };
+        let filterDoc = { 
+            _id: itemId 
+        };
+        let updateDoc = { $push: { "reviews": reviewDoc } };
+        this.db.collection('item').updateOne(filterDoc, updateDoc, function(err, item) {
+            assert.equal(err, null);
+            callback(item);
+        })
     }
 
 
