@@ -142,7 +142,7 @@ function ItemDAO(database) {
         // for (var i=0; i<5; i++) {
         //     items.push(item);
         // }
-        let queryDoc = { $text: query };
+        let queryDoc = { $text: { $search: query } };
         this.db.collection('item').find(queryDoc)
                                     .limit(itemsPerPage)
                                     .skip(page * itemsPerPage)
@@ -156,8 +156,6 @@ function ItemDAO(database) {
 
     this.getNumSearchItems = function(query, callback) {
         "use strict";
-
-        var numItems = 0;
         
         /*
         * TODO-lab2B
@@ -167,8 +165,11 @@ function ItemDAO(database) {
         * to the callback function.
         *
         */
-
-        callback(numItems);
+        let queryDoc = { $text: { $search: query } };
+        this.db.collection('item').find(queryDoc).count(function(err, count) {
+            assert.equal(err, null);
+            callback(count);
+        });
     }
 
 
