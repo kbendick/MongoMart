@@ -142,15 +142,15 @@ function ItemDAO(database) {
         // for (var i=0; i<5; i++) {
         //     items.push(item);
         // }
-        let queryDoc = { $text: query };
-        this.db.collection('item').find(queryDoc)
-                                    .limit(itemsPerPage)
-                                    .skip(page * itemsPerPage)
-                                    .toArray(function(err, items) {
-                                        assert.equal(err, null);
-                                        callback(items);
-                                    }
-        );
+        // let queryDoc = { $text: query };
+        // this.db.collection('item').find(queryDoc)
+        //                             .limit(itemsPerPage)
+        //                             .skip(page * itemsPerPage)
+        //                             .toArray(function(err, items) {
+        //                                 assert.equal(err, null);
+        //                                 callback(items);
+        //                             }
+        // );
     }
 
 
