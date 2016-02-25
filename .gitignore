@@ -31,3 +31,23 @@ node_modules
 
 # Optional REPL history
 .node_repl_history
+
+# OS X
+.DS_Store*
+Icon?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*~
+
+# Coveralls
+coverage
+
+# Benchmarking
+benchmarks/graphs
