@@ -18,7 +18,12 @@
 var MongoClient = require('mongodb').MongoClient,
     assert = require('assert');
 
-
+/*
+ * ItemDAO - Item data access object
+ *
+ * The items DAO is used throughout MongoMart to implement several of the routs in the
+ * application
+ */
 function ItemDAO(database) {
     "use strict";
 
@@ -28,8 +33,6 @@ function ItemDAO(database) {
         "use strict";
         
         /*
-        * TODO-lab1A
-        *
         * LAB #1A: 
         * Create an aggregation query to return the total number of items in each category. The
         * documents in the array output by your aggregation should contain fields for 
@@ -42,18 +45,24 @@ function ItemDAO(database) {
         * should identify the total number of documents across all categories.
         *
         */
-
-        var categories = [];
-        var category = {
-            _id: "All",
-            num: 9999
-        };
-
-        categories.push(category)
-
-        // TODO-lab1A Replace all code above (in this method).
-        
-        callback(categories);
+        let allCategoriesObject = { _id: "All", num: 0 };
+        this.db.collection('item').aggregate([
+            { $match: { category: { $ne: null } } },
+            { $group: {
+                _id: "$category",
+                num: { $sum: 1 }
+            } },
+            { $sort: { _id: 1 } }
+        ]).toArray(function(err, docs) {
+            assert.equal(err, null);
+            let allCategoriesCount = 0;
+            for (let i = 0; i < docs.length; i++) {
+                allCategoriesCount = allCategoriesCount + docs[i].num;
+            }
+            allCategoriesObject.num = allCategoriesCount;
+            docs.unshift(allCategoriesObject);
+            callback(docs);
+        });
     }
 
 
@@ -61,8 +70,6 @@ function ItemDAO(database) {
         "use strict";
         
         /*
-         * TODO-lab1B
-         *
          * LAB #1B: 
          * Create a query to select only the items that should be displayed for a particular
          * page. For example, on the first page, only the first itemsPerPage should be displayed. 
@@ -72,23 +79,23 @@ function ItemDAO(database) {
          * Do NOT sort items. 
          *
          */
-
-        var pageItem = this.createDummyItem();
-        var pageItems = [];
-        for (var i=0; i<5; i++) {
-            pageItems.push(pageItem);
+        let queryDoc = { "category": category }
+        if (category == "All") {
+            queryDoc = {};
         }
+        this.db.collection('item').find(queryDoc)
+                                    .limit(itemsPerPage)
+                                    .skip(page * itemsPerPage)
+                                    .toArray(function(err, items) {
+            assert.equal(err, null);
+            callback(items);
+        });
 
-        // TODO-lab1B Replace all code above (in this method).
-
-        callback(pageItems);
     }
 
 
     this.getNumItems = function(category, callback) {
         "use strict";
-        
-        var numItems = 0;
 
         /*
          * TODO-lab1C
@@ -101,8 +108,14 @@ function ItemDAO(database) {
          * getNumItems() method.
          *
          */
-        
-        callback(numItems);
+        let queryDoc = { category: category };
+        if (category === "All") {
+            queryDoc = {};          // Don't filter on "All"
+        }
+        this.db.collection('item').find(queryDoc).count(function(err, count) {
+            if (err) throw err;
+            callback(count);
+        });
     }
 
 
@@ -124,15 +137,20 @@ function ItemDAO(database) {
          *
          */
         
-        var item = this.createDummyItem();
-        var items = [];
-        for (var i=0; i<5; i++) {
-            items.push(item);
-        }
-
-        // TODO-lab2A Replace all code above (in this method).
-
-        callback(items);
+        // var item = this.createDummyItem();
+        // var items = [];
+        // for (var i=0; i<5; i++) {
+        //     items.push(item);
+        // }
+        let queryDoc = { $text: query };
+        this.db.collection('item').find(queryDoc)
+                                    .limit(itemsPerPage)
+                                    .skip(page * itemsPerPage)
+                                    .toArray(function(err, items) {
+                                        assert.equal(err, null);
+                                        callback(items);
+                                    }
+        );
     }
 
 
