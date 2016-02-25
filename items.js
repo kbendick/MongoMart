@@ -183,12 +183,11 @@ function ItemDAO(database) {
          * to the callback function.
          *
          */
-        
-        var item = this.createDummyItem();
-
-        // TODO-lab3 Replace all code above (in this method).
-
-        callback(item);
+        let queryDoc = { _id: itemId };
+        this.db.collection('item').find(queryDoc).limit(1).next(function(err, item) {
+            assert.equal(err, null);
+            callback(item);
+        });
     }
 
 
