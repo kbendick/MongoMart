@@ -75,10 +75,14 @@ function CartDAO(database) {
         let queryDoc = { 
             "userId": userId,
             "items._id": itemId
-        }
-        this.cartCollection.find(queryDoc).limit(1).project({ "items.$": 1 }).next(function(err, item) {
+        };
+        this.cartCollection.findOne(queryDoc, { "items.$": 1 }, function(err, result) {
             assert.equal(err, null);
-            callback(item);
+            if (result !== null) {
+                result = result.items[0];
+            }
+            console.log(result);
+            callback(result);
         });
     }
 
@@ -168,18 +172,37 @@ function CartDAO(database) {
         * https://docs.mongodb.org/manual/reference/operator/update/positional/
         *
         */
-
-        var userCart = {
+        let queryDoc = { 
             userId: userId,
-            items: []
-        }
-        var dummyItem = this.createDummyItem();
-        dummyItem.quantity = quantity;
-        userCart.items.push(dummyItem);
-        callback(userCart);
-        
-        // TODO-lab7 Replace all code above (in this method).
+            "items._id": itemId 
+        };
+        let updateIncreaseQuantityDoc = {
+                $set: { "items.$.quantity": quantity }
+        };
+        let updateRemoveItemDoc = {
+            $pull: { "items._id": itemId }
+        };
+        let optionsDoc = {
+            upsert: true, 
+            returnOriginal: false 
+        };
+        let updateDoc = {};
 
+        if (quantity === 0) {
+            updateDoc = updateRemoveItemDoc;
+        } else {
+            updateDoc = updateIncreaseQuantityDoc;
+            // this.db.collection('cart').findOneAndUpdate(
+            //     queryDoc, updateIncreaseQuantityDoc, optionsDoc, function(err, result) {
+            //         assert.equal(err, null);
+            //         callback(result);
+            // });
+        }
+
+        this.db.collection('cart').findOneAndUpdate(queryDoc, updateDoc, optionsDoc, function(err, doc) {
+            assert.equal(err, null);
+            callback(error);
+        });
     }
 
     this.createDummyItem = function() {
