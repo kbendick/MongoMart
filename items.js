@@ -221,9 +221,7 @@ function ItemDAO(database) {
             stars: stars,
             date: Date.now()
         };
-        let filterDoc = { 
-            _id: itemId 
-        };
+        let filterDoc = { "_id": itemId };
         let updateDoc = { $push: { "reviews": reviewDoc } };
         this.db.collection('item').updateOne(filterDoc, updateDoc, function(err, item) {
             assert.equal(err, null);

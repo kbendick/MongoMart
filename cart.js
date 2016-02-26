@@ -23,6 +23,7 @@ function CartDAO(database) {
     "use strict";
 
     this.db = database;
+    this.cartCollection = this.db.collection('cart');
 
     
     this.getCart = function(userId, callback) {
@@ -36,17 +37,11 @@ function CartDAO(database) {
         * callback function.
         *
         */
-
-        var userCart = {
-            userId: userId,
-            items: []
-        }
-        var dummyItem = this.createDummyItem();
-        userCart.items.push(dummyItem);
-        
-        // TODO-lab5 Replace all code above (in this method).
-
-        callback(userCart);
+        let queryDoc = { "userId": userId };
+        this.cartCollection.findOne(queryDoc, function(err, userCart) {
+            assert.equal(err, null);
+            callback(userCart);
+        });
     }
 
 
