@@ -172,36 +172,32 @@ function CartDAO(database) {
         * https://docs.mongodb.org/manual/reference/operator/update/positional/
         *
         */
-        let queryDoc = { 
+
+        let queryDoc = {
             userId: userId,
             "items._id": itemId 
         };
-        let updateIncreaseQuantityDoc = {
-                $set: { "items.$.quantity": quantity }
-        };
-        let updateRemoveItemDoc = {
-            $pull: { "items._id": itemId }
-        };
         let optionsDoc = {
-            upsert: true, 
+            upsert: false, 
             returnOriginal: false 
         };
+        // Documents used for the update
+        let updateIncreaseQuantityDoc = {               // quantity !== 0
+                $set: { "items.$.quantity": quantity }
+        };
+        let updateRemoveItemDoc = { $pull: { "items": { _id: itemId } } };  // quantity === 0
         let updateDoc = {};
 
         if (quantity === 0) {
             updateDoc = updateRemoveItemDoc;
         } else {
             updateDoc = updateIncreaseQuantityDoc;
-            // this.db.collection('cart').findOneAndUpdate(
-            //     queryDoc, updateIncreaseQuantityDoc, optionsDoc, function(err, result) {
-            //         assert.equal(err, null);
-            //         callback(result);
-            // });
         }
 
-        this.db.collection('cart').findOneAndUpdate(queryDoc, updateDoc, optionsDoc, function(err, doc) {
+        this.db.collection('cart').findOneAndUpdate(queryDoc, updateDoc, optionsDoc, function(err, result) {
             assert.equal(err, null);
-            callback(error);
+            console.log(result);
+            callback(result.value);
         });
     }
 
